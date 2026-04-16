@@ -69,7 +69,7 @@ def run_tests():
         print(f"Agent: {response}\n")
 
     print("\nExporting audit log...")
-    pipeline.audit.export("audit_log.json")
+    pipeline.audit.export("assignment11/audit_log.json")
     print("Metrics:")
     import pprint
     pprint.pprint(pipeline.audit.metrics)
