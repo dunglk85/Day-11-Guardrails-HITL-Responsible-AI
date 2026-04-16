@@ -1,5 +1,5 @@
 # Bài tập 11: Báo cáo Hệ thống Phòng thủ Đa Lớp (Defense-in-Depth Pipeline)
-**Tác giả:** Lê Kim Dũng
+**Tác giả:** Lê Kim Dũng _ 2A202600100
 **Khóa học:** AICB-P1 — AI Agent Development
 
 ---
