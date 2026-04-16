@@ -84,13 +84,39 @@ class ConfidenceRouter:
         #      action="escalate", priority="high",
         #      requires_human=True, reason="Low confidence — escalating"
 
-        return RoutingDecision(
-            action="auto_send",
-            confidence=confidence,
-            reason="TODO: implement routing logic",
-            priority="low",
-            requires_human=False,
-        )  # TODO: Replace with implementation
+        if action_type in HIGH_RISK_ACTIONS:
+            return RoutingDecision(
+                action="escalate",
+                confidence=confidence,
+                reason=f"High-risk action: {action_type}",
+                priority="high",
+                requires_human=True,
+            )
+            
+        if confidence >= self.HIGH_THRESHOLD:
+            return RoutingDecision(
+                action="auto_send",
+                confidence=confidence,
+                reason="High confidence",
+                priority="low",
+                requires_human=False,
+            )
+        elif confidence >= self.MEDIUM_THRESHOLD:
+            return RoutingDecision(
+                action="queue_review",
+                confidence=confidence,
+                reason="Medium confidence — needs review",
+                priority="normal",
+                requires_human=True,
+            )
+        else:
+            return RoutingDecision(
+                action="escalate",
+                confidence=confidence,
+                reason="Low confidence — escalating",
+                priority="high",
+                requires_human=True,
+            )
 
 
 # ============================================================
@@ -109,27 +135,27 @@ class ConfidenceRouter:
 hitl_decision_points = [
     {
         "id": 1,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
+        "name": "High-Risk Transaction Authorization",
+        "trigger": "Actions involving transferring money, closing accounts, or changing sensitive personal info.",
+        "hitl_model": "human-in-the-loop",
+        "context_needed": "User's historic transaction patterns, device used for the request, and exact request amount/details.",
+        "example": "A user attempts to transfer 50,000,000 VND to an unknown account.",
     },
     {
         "id": 2,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
+        "name": "Policy Exception Handling",
+        "trigger": "A user requests an exception to standard banking policies, such as a late fee waiver.",
+        "hitl_model": "human-on-the-loop",
+        "context_needed": "Customer's account standing, prior exception requests, and reason for the policy violation.",
+        "example": "A long-time customer asks the AI to reverse a recent late fee because they were in the hospital.",
     },
     {
         "id": 3,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
+        "name": "Fraud Detection Tiebreaker",
+        "trigger": "Multiple automated fraud detection models return conflicting scores for a particular transaction.",
+        "hitl_model": "human-as-tiebreaker",
+        "context_needed": "Risk scores from all models, fraud markers triggered, and transaction history.",
+        "example": "One model flags a login attempt as 95% risky, but the behavioral model flags it as 15% risky.",
     },
 ]
 

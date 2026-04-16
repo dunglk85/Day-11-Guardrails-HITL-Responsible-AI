@@ -40,7 +40,12 @@ def detect_injection(user_input: str) -> bool:
     INJECTION_PATTERNS = [
         # TODO: Add at least 5 regex patterns
         # Example:
-        # r"ignore (all )?(previous|above) instructions",
+        r"ignore\\s+(all\\s+)?(previous|above)\\s+instructions",
+        r"you\\s+are\\s+now",
+        r"system\\s+prompt",
+        r"reveal\\s+your\\s+(instructions|prompt)",
+        r"pretend\\s+you\\s+are",
+        r"act\\s+as\\s+(a\\s+|an\\s+)?unrestricted",
     ]
 
     for pattern in INJECTION_PATTERNS:
@@ -75,7 +80,22 @@ def topic_filter(user_input: str) -> bool:
     # 2. If input doesn't contain any allowed topic -> return True
     # 3. Otherwise -> return False (allow)
 
-    pass  # Replace with your implementation
+    for blocked in BLOCKED_TOPICS:
+        if blocked in input_lower:
+            return True
+
+    # 2. If input doesn't contain any allowed topic -> return True
+    has_allowed = False
+    for allowed in ALLOWED_TOPICS:
+        if allowed in input_lower:
+            has_allowed = True
+            break
+            
+    if not has_allowed:
+        return True
+        
+    # 3. Otherwise -> return False (allow)
+    return False
 
 
 # ============================================================
@@ -135,7 +155,18 @@ class InputGuardrailPlugin(base_plugin.BasePlugin):
         #    - If True: increment blocked_count, return self._block_response("...")
         # 3. If both are False: return None (let message through)
 
-        pass  # Replace with your implementation
+         # 1. Call detect_injection(text)
+        if detect_injection(text):
+            self.blocked_count += 1
+            return self._block_response("I cannot process this request due to safety concerns.")
+            
+        # 2. Call topic_filter(text)
+        if topic_filter(text):
+            self.blocked_count += 1
+            return self._block_response("I can only assist with banking-related questions.")
+            
+        # 3. If both are False: return None (let message through)
+        return None
 
 
 # ============================================================
